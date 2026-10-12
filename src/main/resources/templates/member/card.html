@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>会员卡管理 - 健身管理系统</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body { background:#f5f7fa; }
+  .sidebar { min-height:100vh; background:#1e293b; padding-top:20px; }
+  .sidebar a { color:#cbd5e1; display:block; padding:10px 20px; text-decoration:none; border-left:3px solid transparent; }
+  .sidebar a:hover, .sidebar a.active { background:#334155; color:#fff; border-left-color:#3b82f6; }
+  .sidebar .brand { color:#fff; font-size:18px; font-weight:bold; padding:0 20px 20px; border-bottom:1px solid #334155; margin-bottom:10px; }
+  .content { padding:20px; }
+  .card { border:none; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+</style>
+</head>
+<body>
+<div class="container-fluid">
+<div class="row">
+  <div class="col-md-2 sidebar p-0" th:replace="~{fragments/nav :: nav}"></div>
+  <div class="col-md-10 content">
+    <h4>会员卡管理 - <span th:text="${member.name}"></span>（<span th:text="${member.memberId}"></span>）</h4>
+    <div class="row">
+      <div class="col-md-7">
+        <div class="card p-3">
+          <h6>已有会员卡</h6>
+          <table class="table table-sm">
+            <thead><tr><th>卡号</th><th>卡种</th><th>开始</th><th>到期</th><th>剩余次数</th><th>状态</th><th>操作</th></tr></thead>
+            <tbody>
+            <tr th:each="c : ${cards}">
+              <td th:text="'#' + ${c.cardId}"></td>
+              <td th:text="${c.cardType}"></td>
+              <td th:text="${c.startDate}"></td>
+              <td th:text="${c.endDate}"></td>
+              <td th:text="${c.cardType == '次卡'} ? ${c.remainingTimes} : '-'"></td>
+              <td>
+                <span th:if="${c.status == '有效'}" class="badge bg-success" th:text="${c.status}"></span>
+                <span th:if="${c.status != '有效'}" class="badge bg-warning" th:text="${c.status}"></span>
+              </td>
+              <td>
+                <a th:if="${c.status == '有效'}" th:href="@{/member/card/freeze(cardId=${c.cardId}, id=${member.memberId})}"
+                   class="btn btn-sm btn-outline-warning" onclick="return confirm('确认冻结？')">冻结</a>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="col-md-5">
+        <div class="card p-3">
+          <h6>办理新卡</h6>
+          <form method="post" th:action="@{/member/card(id=${member.memberId})}">
+            <div class="mb-2"><label class="form-label">卡种</label>
+              <select name="cardType" class="form-select" id="cardType"><option>月卡</option><option>季卡</option><option>年卡</option><option>次卡</option></select></div>
+            <div class="mb-2"><label class="form-label">开始日期</label><input type="date" name="startDate" class="form-control" th:value="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}"></div>
+            <div class="mb-2" id="timesBox"><label class="form-label">总次数（次卡）</label><input type="number" name="totalTimes" class="form-control" value="30"></div>
+            <button class="btn btn-primary w-100">办理</button>
+          </form>
+        </div>
+        <a th:href="@{/member/list}" class="btn btn-outline-secondary mt-2">返回会员列表</a>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+document.getElementById('cardType').onchange = function(){
+  document.getElementById('timesBox').style.display = this.value === '次卡' ? 'block' : 'none';
+};
+</script>
+<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

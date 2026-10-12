@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>健身房会员与训练管理系统</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body { background:#f5f7fa; }
+  .sidebar { min-height:100vh; background:#1e293b; padding-top:20px; }
+  .sidebar a { color:#cbd5e1; display:block; padding:10px 20px; text-decoration:none; border-left:3px solid transparent; }
+  .sidebar a:hover, .sidebar a.active { background:#334155; color:#fff; border-left-color:#3b82f6; }
+  .sidebar .brand { color:#fff; font-size:18px; font-weight:bold; padding:0 20px 20px; border-bottom:1px solid #334155; margin-bottom:10px; }
+  .content { padding:20px; }
+  .card { border:none; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  .stat-card { border-left:4px solid #3b82f6; }
+</style>
+</head>
+<body>
+<div class="container-fluid">
+<div class="row">
+  <div class="col-md-2 sidebar p-0" th:replace="~{fragments/nav :: nav}"></div>
+  <div class="col-md-10 content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4>欢迎，<span th:text="${session.realName}"></span>（<span th:text="${session.role == 'admin'} ? '系统管理员' : (${session.role == 'front'} ? '前台接待' : (${session.role == 'coach'} ? '教练' : '会员'))"></span>）</h4>
+      <span class="text-muted" th:text="${#temporals.format(#temporals.createNow(), 'yyyy年MM月dd日 HH:mm')}"></span>
+    </div>
+
+    <!-- ===== 管理员/前台仪表盘 ===== -->
+    <th:block th:if="${session.role == 'admin' or session.role == 'front'}">
+      <div class="row mb-4">
+        <div class="col-md-3 mb-3">
+          <div class="card stat-card p-3"><div class="d-flex justify-content-between">
+            <div><div class="text-muted small">会员总数</div><div class="fs-3 fw-bold" th:text="${memberCount}"></div></div><div class="fs-2">👤</div>
+          </div></div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="card stat-card p-3" style="border-left-color:#10b981"><div class="d-flex justify-content-between">
+            <div><div class="text-muted small">在职教练</div><div class="fs-3 fw-bold" th:text="${coachCount}"></div></div><div class="fs-2">🧑‍🏫</div>
+          </div></div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="card stat-card p-3" style="border-left-color:#f59e0b"><div class="d-flex justify-content-between">
+            <div><div class="text-muted small">今日预约</div><div class="fs-3 fw-bold" th:text="${todayReserve}"></div></div><div class="fs-2">📅</div>
+          </div></div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <div class="card stat-card p-3" style="border-left-color:#ef4444"><div class="d-flex justify-content-between">
+            <div><div class="text-muted small">本月营收</div><div class="fs-3 fw-bold">¥<span th:text="${#numbers.formatDecimal(monthRevenue, 1, 2)}"></span></div></div><div class="fs-2">💰</div>
+          </div></div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card p-3 mb-3">
+            <h6>今日预约课程</h6>
+            <table class="table table-sm table-hover mb-0">
+              <thead><tr><th>时间</th><th>会员</th><th>教练</th><th>课程</th><th>状态</th></tr></thead>
+              <tbody>
+              <tr th:each="r : ${todayReservations}">
+                <td th:text="${#temporals.format(r.reserve_time, 'HH:mm')}"></td>
+                <td th:text="${r.mname}"></td>
+                <td th:text="${r.cname}"></td>
+                <td th:text="${r.course_name}"></td>
+                <td><span class="badge bg-info" th:text="${r.status}"></span></td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(todayReservations)}">
+                <td colspan="5" class="text-center text-muted">今日暂无预约</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h6>库存预警商品</h6>
+            <table class="table table-sm table-hover mb-0">
+              <thead><tr><th>商品</th><th>类别</th><th>库存</th><th>预警阈值</th></tr></thead>
+              <tbody>
+              <tr th:each="p : ${warnProducts}" class="table-warning">
+                <td th:text="${p.name}"></td>
+                <td th:text="${p.category}"></td>
+                <td class="text-danger fw-bold" th:text="${p.stock}"></td>
+                <td th:text="${p.warn_threshold}"></td>
+              </tr>
+              <tr th:if="${#lists.isEmpty(warnProducts)}">
+                <td colspan="4" class="text-center text-muted">库存充足</td>
+              </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </th:block>
+
+    <!-- ===== 教练仪表盘 ===== -->
+    <th:block th:if="${session.role == 'coach'}">
+      <div class="row mb-4">
+        <div class="col-md-4"><div class="card stat-card p-3"><div class="text-muted small">今日课程</div><div class="fs-3 fw-bold" th:text="${todayCourse}"></div></div></div>
+        <div class="col-md-4"><div class="card stat-card p-3" style="border-left-color:#10b981"><div class="text-muted small">本月已消课</div><div class="fs-3 fw-bold" th:text="${monthClass} + ' 节'"></div></div></div>
+        <div class="col-md-4"><div class="card stat-card p-3" style="border-left-color:#f59e0b"><div class="text-muted small">预计提成</div><div class="fs-3 fw-bold">¥<span th:text="${#numbers.formatDecimal(hourlyRate * 0.4 * monthClass, 1, 2)}"></span></div></div></div>
+      </div>
+      <div class="card p-3">
+        <h6>我的近期课表</h6>
+        <table class="table table-hover">
+          <thead><tr><th>时间</th><th>会员</th><th>课程</th><th>状态</th><th>操作</th></tr></thead>
+          <tbody>
+          <tr th:each="r : ${mySchedule}">
+            <td th:text="${#temporals.format(r.reserve_time, 'MM-dd HH:mm')}"></td>
+            <td th:text="${r.mname}"></td>
+            <td th:text="${r.course_name}"></td>
+            <td><span class="badge bg-secondary" th:text="${r.status}"></span></td>
+            <td>
+              <a th:if="${r.status == '已签到'}" th:href="@{/training/add}" class="btn btn-sm btn-success">录入训练</a>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </th:block>
+
+    <!-- ===== 会员仪表盘 ===== -->
+    <th:block th:if="${session.role == 'member'}">
+      <div class="row mb-4">
+        <div class="col-md-4"><div class="card stat-card p-3"><div class="text-muted small">有效会员卡</div><div class="fs-3 fw-bold" th:text="${cardSummary.cardCount} + ' 张'"></div></div></div>
+        <div class="col-md-4"><div class="card stat-card p-3" style="border-left-color:#10b981"><div class="text-muted small">剩余课时</div><div class="fs-3 fw-bold" th:text="${cardSummary.totalRemaining} + ' 次'"></div></div></div>
+        <div class="col-md-4"><div class="card stat-card p-3" style="border-left-color:#f59e0b"><div class="text-muted small">最近到期</div><div class="fs-5 fw-bold" th:text="${cardSummary.latestExpire == null ? '无' : cardSummary.latestExpire}"></div></div></div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <div class="card p-3 mb-3"><h6>我的预约</h6>
+            <table class="table table-sm"><thead><tr><th>时间</th><th>教练</th><th>课程</th><th>状态</th></tr></thead><tbody>
+            <tr th:each="r : ${myReservations}">
+              <td th:text="${#temporals.format(r.reserve_time, 'MM-dd HH:mm')}"></td>
+              <td th:text="${r.cname}"></td>
+              <td th:text="${r.course_name}"></td>
+              <td th:text="${r.status}"></td>
+            </tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card p-3"><h6>体测变化</h6>
+            <table class="table table-sm"><thead><tr><th>日期</th><th>体重</th><th>体脂</th><th>BMI</th></tr></thead><tbody>
+            <tr th:each="b : ${myBody}">
+              <td th:text="${#dates.format(b.measure_date, 'yyyy-MM-dd')}"></td>
+              <td th:text="${b.weight} + 'kg'"></td>
+              <td th:text="${b.body_fat} + '%'"></td>
+              <td th:text="${b.bmi}"></td>
+            </tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+    </th:block>
+  </div>
+</div>
+</div>
+<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>预约管理 - 健身管理系统</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body { background:#f5f7fa; }
+  .sidebar { min-height:100vh; background:#1e293b; padding-top:20px; }
+  .sidebar a { color:#cbd5e1; display:block; padding:10px 20px; text-decoration:none; border-left:3px solid transparent; }
+  .sidebar a:hover, .sidebar a.active { background:#334155; color:#fff; border-left-color:#3b82f6; }
+  .sidebar .brand { color:#fff; font-size:18px; font-weight:bold; padding:0 20px 20px; border-bottom:1px solid #334155; margin-bottom:10px; }
+  .content { padding:20px; }
+  .card { border:none; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  .list-table-wrap { max-height:calc(100vh - 310px); overflow:auto; }
+  .list-table-wrap thead { position:sticky; top:0; z-index:1; }
+</style>
+</head>
+<body>
+<div class="container-fluid">
+<div class="row">
+  <div class="col-md-2 sidebar p-0" th:replace="~{fragments/nav :: nav}"></div>
+  <div class="col-md-10 content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4>预约管理</h4>
+      <a th:if="${role == 'admin' or role == 'front' or role == 'member'}" th:href="@{/reservation/add}" class="btn btn-primary">+ 新增预约</a>
+    </div>
+    <div class="card p-3">
+      <form method="get" th:action="@{/reservation/list}" class="row g-2 mb-3">
+        <div class="col-md-3"><input type="date" name="date" class="form-control" th:value="${date}"></div>
+        <div class="col-md-2"><button class="btn btn-outline-primary">筛选</button></div>
+      </form>
+      <div class="list-table-wrap"><table class="table table-hover align-middle mb-0">
+        <thead class="table-light"><tr><th>预约号</th><th>时间</th><th>会员</th><th>教练</th><th>课程</th><th>状态</th><th>操作</th></tr></thead>
+        <tbody>
+        <tr th:each="r : ${reservations}">
+          <td th:text="'#' + ${r.reservation_id}"></td>
+          <td th:text="${#temporals.format(r.reserve_time, 'MM-dd HH:mm')} + '~' + ${#temporals.format(r.reserve_time, 'HH:mm')}"></td>
+          <td th:text="${r.mname}"></td>
+          <td th:text="${r.cname}"></td>
+          <td th:text="${r.course_name}"></td>
+          <td>
+            <span th:if="${r.status == '已预约'}" class="badge bg-info" th:text="${r.status}"></span>
+            <span th:if="${r.status == '已签到'}" class="badge bg-primary" th:text="${r.status}"></span>
+            <span th:if="${r.status == '已消课'}" class="badge bg-success" th:text="${r.status}"></span>
+            <span th:if="${r.status == '已取消'}" class="badge bg-secondary" th:text="${r.status}"></span>
+          </td>
+          <td>
+            <a th:if="${r.status == '已预约' and (role == 'admin' or role == 'front')}"
+               th:href="@{/reservation/list(action='signin', id=${r.reservation_id}, date=${date}, page=${currentPage})}" class="btn btn-sm btn-outline-primary">签到</a>
+            <a th:if="${r.status == '已签到' and (role == 'admin' or role == 'front' or role == 'coach')}"
+               th:href="@{/reservation/list(action='finish', id=${r.reservation_id}, date=${date}, page=${currentPage})}"
+               class="btn btn-sm btn-outline-success" onclick="return confirm('确认消课？将扣减会员课时')">消课</a>
+            <a th:if="${r.status == '已预约'}"
+               th:href="@{/reservation/list(action='cancel', id=${r.reservation_id}, date=${date}, page=${currentPage})}"
+               class="btn btn-sm btn-outline-danger" onclick="return confirm('确认取消？')">取消</a>
+          </td>
+        </tr>
+        </tbody>
+      </table></div>
+      <nav th:replace="~{fragments/pagination :: pager}"></nav>
+    </div>
+  </div>
+</div>
+</div>
+<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+<nav xmlns:th="http://www.thymeleaf.org" th:fragment="pager" class="d-flex justify-content-between align-items-center flex-wrap gap-2 mt-2" aria-label="列表分页">
+  <small class="text-muted" th:text="'共 ' + ${pageData.totalElements} + ' 条，第 ' + (${pageData.totalPages == 0 ? 0 : pageData.number + 1}) + ' / ' + ${pageData.totalPages} + ' 页'"></small>
+  <ul class="pagination pagination-sm mb-0" th:if="${pageData.totalPages > 1}">
+    <li class="page-item" th:classappend="${pageData.first} ? 'disabled'"><a class="page-link" th:href="@{${pagePath}(page=${currentPage - 1}, kw=${kw}, date=${date})}">上一页</a></li>
+    <li class="page-item" th:each="i : ${#numbers.sequence(0, pageData.totalPages > 0 ? pageData.totalPages - 1 : 0)}" th:if="${i >= currentPage - 2 and i <= currentPage + 2}" th:classappend="${i == currentPage} ? 'active'"><a class="page-link" th:href="@{${pagePath}(page=${i}, kw=${kw}, date=${date})}" th:text="${i + 1}"></a></li>
+    <li class="page-item" th:classappend="${pageData.last} ? 'disabled'"><a class="page-link" th:href="@{${pagePath}(page=${currentPage + 1}, kw=${kw}, date=${date})}">下一页</a></li>
+  </ul>
+</nav>

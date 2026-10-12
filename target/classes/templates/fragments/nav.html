@@ -1,0 +1,45 @@
+<div xmlns:th="http://www.thymeleaf.org">
+<!-- 侧边栏导航：按角色动态生成 -->
+<div th:fragment="nav" class="col-md-2 sidebar p-0">
+    <div class="brand">🏋️ 健身管理系统</div>
+
+    <!-- 管理员菜单 -->
+    <th:block th:if="${session.role == 'admin'}">
+        <a th:href="@{/dashboard}" th:classappend="${activeMenu == 'dashboard'} ? 'active'">📊 仪表盘</a>
+        <a th:href="@{/member/list}">👤 会员管理</a>
+        <a th:href="@{/coach/list}">🧑‍🏫 教练管理</a>
+        <a th:href="@{/course/list}">📋 课程管理</a>
+        <a th:href="@{/reservation/list}">📅 预约管理</a>
+        <a th:href="@{/training/list}">💪 训练记录</a>
+        <a th:href="@{/product/list}">📦 商品库存</a>
+        <a th:href="@{/sale/list}">💰 消费管理</a>
+        <a th:href="@{/report/index}">📈 统计报表</a>
+        <a th:href="@{/system/user}">⚙️ 系统管理</a>
+    </th:block>
+
+    <!-- 前台菜单 -->
+    <th:block th:if="${session.role == 'front'}">
+        <a th:href="@{/dashboard}" th:classappend="${activeMenu == 'dashboard'} ? 'active'">📊 工作台</a>
+        <a th:href="@{/member/list}">👤 会员管理</a>
+        <a th:href="@{/reservation/list}">📅 预约管理</a>
+        <a th:href="@{/sale/list}">💰 消费管理</a>
+        <a th:href="@{/product/list}">📦 商品库存</a>
+    </th:block>
+
+    <!-- 教练菜单 -->
+    <th:block th:if="${session.role == 'coach'}">
+        <a th:href="@{/dashboard}" th:classappend="${activeMenu == 'dashboard'} ? 'active'">📊 我的课表</a>
+        <a th:href="@{/reservation/list}">📅 课程预约</a>
+        <a th:href="@{/training/list}">💪 训练记录</a>
+    </th:block>
+
+    <!-- 会员菜单 -->
+    <th:block th:if="${session.role == 'member'}">
+        <a th:href="@{/dashboard}" th:classappend="${activeMenu == 'dashboard'} ? 'active'">📊 我的主页</a>
+        <a th:href="@{/reservation/list}">📅 我的预约</a>
+        <a th:href="@{/training/list}">💪 训练记录</a>
+    </th:block>
+
+    <a th:href="@{/logout}" style="margin-top:30px;color:#f87171;">🚪 退出登录</a>
+</div>
+</div>

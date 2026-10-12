@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>训练详情 - 健身管理系统</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body { background:#f5f7fa; }
+  .sidebar { min-height:100vh; background:#1e293b; padding-top:20px; }
+  .sidebar a { color:#cbd5e1; display:block; padding:10px 20px; text-decoration:none; border-left:3px solid transparent; }
+  .sidebar a:hover, .sidebar a.active { background:#334155; color:#fff; border-left-color:#3b82f6; }
+  .sidebar .brand { color:#fff; font-size:18px; font-weight:bold; padding:0 20px 20px; border-bottom:1px solid #334155; margin-bottom:10px; }
+  .content { padding:20px; }
+  .card { border:none; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+</style>
+</head>
+<body>
+<div class="container-fluid">
+<div class="row">
+  <div class="col-md-2 sidebar p-0" th:replace="~{fragments/nav :: nav}"></div>
+  <div class="col-md-10 content">
+    <h4>训练记录详情 #<span th:text="${log.logId}"></span></h4>
+    <div class="card p-3 mb-3">
+      <div class="row">
+        <div class="col-md-3"><strong>会员：</strong><span th:text="${logInfo.mname}"></span></div>
+        <div class="col-md-3"><strong>教练：</strong><span th:text="${logInfo.cname == null ? '无' : logInfo.cname}"></span></div>
+        <div class="col-md-2"><strong>日期：</strong><span th:text="${#dates.format(logInfo.training_date, 'yyyy-MM-dd')}"></span></div>
+        <div class="col-md-2"><strong>部位：</strong><span th:text="${logInfo.training_part}"></span></div>
+        <div class="col-md-2"><strong>时长：</strong><span th:text="${logInfo.duration} + '分钟'"></span></div>
+      </div>
+      <div class="mt-2 text-muted" th:if="${logInfo.remark != null}"><strong>备注：</strong><span th:text="${logInfo.remark}"></span></div>
+    </div>
+    <div class="card p-3">
+      <h6>训练明细（从表数据）</h6>
+      <table class="table table-hover">
+        <thead class="table-light"><tr><th>动作名称</th><th>重量(kg)</th><th>组数</th><th>每组次数</th><th>总次数</th><th>组间休息</th></tr></thead>
+        <tbody>
+        <tr th:each="d : ${details}">
+          <td th:text="${d.exerciseName}"></td>
+          <td th:text="${d.weight}"></td>
+          <td th:text="${d.sets}"></td>
+          <td th:text="${d.reps}"></td>
+          <td th:text="${d.sets * d.reps}"></td>
+          <td th:text="${d.restSeconds} + '秒'"></td>
+        </tr>
+        </tbody>
+        <tfoot><tr class="table-active"><td colspan="2"><strong>合计</strong></td><td><strong th:text="${log.totalSets} + ' 组'"></strong></td><td colspan="3"></td></tr></tfoot>
+      </table>
+    </div>
+    <a th:href="@{/training/list}" class="btn btn-outline-secondary mt-3">返回列表</a>
+  </div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

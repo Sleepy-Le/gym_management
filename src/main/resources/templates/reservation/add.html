@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>新增预约 - 健身管理系统</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body { background:#f5f7fa; }
+  .sidebar { min-height:100vh; background:#1e293b; padding-top:20px; }
+  .sidebar a { color:#cbd5e1; display:block; padding:10px 20px; text-decoration:none; border-left:3px solid transparent; }
+  .sidebar a:hover, .sidebar a.active { background:#334155; color:#fff; border-left-color:#3b82f6; }
+  .sidebar .brand { color:#fff; font-size:18px; font-weight:bold; padding:0 20px 20px; border-bottom:1px solid #334155; margin-bottom:10px; }
+  .content { padding:20px; }
+  .card { border:none; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+</style>
+</head>
+<body>
+<div class="container-fluid">
+<div class="row">
+  <div class="col-md-2 sidebar p-0" th:replace="~{fragments/nav :: nav}"></div>
+  <div class="col-md-10 content">
+    <h4>新增预约</h4>
+    <div class="alert alert-danger" th:if="${msg != null and msgType == 'danger'}" th:text="${msg}"></div>
+    <div class="alert alert-warning" th:if="${msg != null and msgType == 'warning'}" th:text="${msg}"></div>
+    <div class="alert alert-success" th:if="${msg != null and msgType == 'success'}" th:text="${msg}"></div>
+    <div class="card p-4" style="max-width:550px">
+      <form method="post" th:action="@{/reservation/add}">
+        <div class="mb-3"><label class="form-label">会员 *</label>
+          <select name="memberId" class="form-select" required>
+            <option th:each="m : ${members}" th:value="${m.member_id}"
+                    th:selected="${myRefId == m.member_id}"
+                    th:text="${m.member_id} + ' - ' + ${m.name}"></option>
+          </select></div>
+        <div class="mb-3"><label class="form-label">教练 *</label>
+          <select name="coachId" class="form-select" required>
+            <option th:each="c : ${coaches}" th:value="${c.coach_id}"
+                    th:text="${c.name} + '（' + ${c.specialty} + '）'"></option>
+          </select></div>
+        <div class="mb-3"><label class="form-label">课程 *</label>
+          <select name="courseId" class="form-select" required>
+            <option th:each="co : ${courses}" th:value="${co.course_id}"
+                    th:text="${co.course_name} + '（' + ${co.type} + ' ¥' + ${co.price} + '）'"></option>
+          </select></div>
+        <div class="mb-3"><label class="form-label">预约时间 *</label>
+          <input type="datetime-local" name="reserveTime" class="form-control" required></div>
+        <div class="alert alert-info small">系统将自动检测教练时间冲突，冲突时无法预约。</div>
+        <button class="btn btn-primary">提交预约</button>
+        <a th:href="@{/reservation/list}" class="btn btn-outline-secondary">返回</a>
+      </form>
+    </div>
+  </div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>会员管理 - 健身管理系统</title>
+<link href="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body { background:#f5f7fa; }
+  .sidebar { min-height:100vh; background:#1e293b; padding-top:20px; }
+  .sidebar a { color:#cbd5e1; display:block; padding:10px 20px; text-decoration:none; border-left:3px solid transparent; }
+  .sidebar a:hover, .sidebar a.active { background:#334155; color:#fff; border-left-color:#3b82f6; }
+  .sidebar .brand { color:#fff; font-size:18px; font-weight:bold; padding:0 20px 20px; border-bottom:1px solid #334155; margin-bottom:10px; }
+  .content { padding:20px; }
+  .card { border:none; box-shadow:0 1px 3px rgba(0,0,0,.1); }
+  .list-table-wrap { max-height:calc(100vh - 300px); overflow:auto; }
+  .list-table-wrap thead { position:sticky; top:0; z-index:1; }
+</style>
+</head>
+<body>
+<div class="container-fluid">
+<div class="row">
+  <div class="col-md-2 sidebar p-0" th:replace="~{fragments/nav :: nav}"></div>
+  <div class="col-md-10 content">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4>会员管理</h4>
+      <a th:href="@{/member/add}" class="btn btn-primary">+ 新增会员</a>
+    </div>
+    <div class="card p-3">
+      <form method="get" th:action="@{/member/list}" class="row g-2 mb-3">
+        <div class="col-md-4"><input type="text" name="kw" class="form-control" placeholder="搜索姓名/电话/编号" th:value="${kw}"></div>
+        <div class="col-md-2"><button class="btn btn-outline-primary">搜索</button></div>
+      </form>
+      <div class="list-table-wrap"><table class="table table-hover align-middle mb-0">
+        <thead class="table-light"><tr><th>编号</th><th>姓名</th><th>性别</th><th>电话</th><th>注册日期</th><th>状态</th><th>剩余课时</th><th>操作</th></tr></thead>
+        <tbody>
+        <tr th:each="m : ${members}">
+          <td th:text="${m.memberId}"></td>
+          <td th:text="${m.name}"></td>
+          <td th:text="${m.gender}"></td>
+          <td th:text="${m.phone}"></td>
+          <td th:text="${m.registerDate}"></td>
+          <td>
+            <span th:if="${m.status == '正常'}" class="badge bg-success" th:text="${m.status}"></span>
+            <span th:if="${m.status == '冻结'}" class="badge bg-warning" th:text="${m.status}"></span>
+            <span th:if="${m.status == '过期'}" class="badge bg-secondary" th:text="${m.status}"></span>
+          </td>
+          <td th:text="${remainMap[m.memberId]}"></td>
+          <td>
+            <a th:href="@{/member/edit(id=${m.memberId})}" class="btn btn-sm btn-outline-primary">编辑</a>
+            <a th:href="@{/member/card(id=${m.memberId})}" class="btn btn-sm btn-outline-info">会员卡</a>
+          </td>
+        </tr>
+        </tbody>
+      </table></div>
+      <nav th:replace="~{fragments/pagination :: pager}"></nav>
+    </div>
+  </div>
+</div>
+</div>
+<script src="https://cdn.bootcdn.net/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
